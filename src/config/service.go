@@ -2,11 +2,11 @@ package config
 
 import (
 	"database/sql"
-	"fmt"
 	"io/ioutil"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/kpango/glg"
 )
 
 type ServiceConfig struct {
@@ -31,6 +31,6 @@ func SetupService(c ServiceConfig) {
 	err := server.Run(c.Url + ":" + c.Port)
 
 	if err != nil {
-		fmt.Printf("Server   : Not Connect [%s]", err.Error())
+		glg.Log("Server   : Not Connect [%s]", err.Error())
 	}
 }

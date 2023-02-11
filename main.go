@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"kukuhpr21/sample-rest-api-go/src/config"
 	"log"
 	"os"
@@ -11,6 +10,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
+	"github.com/kpango/glg"
 )
 
 var (
@@ -27,10 +27,12 @@ func init() {
 }
 
 func main() {
-	fmt.Println("======================================SERVICE======================================")
-	fmt.Println("Name     : " + os.Getenv("APP_NAME"))
-	fmt.Println("Version  : " + os.Getenv("APP_VERSION"))
-	fmt.Println("Port     : " + os.Getenv("APP_PORT"))
+	setupLogger()
+	
+	glg.Log("======================================SERVICE======================================")
+	glg.Log("Name     : " + os.Getenv("APP_NAME"))
+	glg.Log("Version  : " + os.Getenv("APP_VERSION"))
+	glg.Log("Port     : " + os.Getenv("APP_PORT"))
 
 	// init database
 	db, err := config.NewDB(config.DatabaseConfig{
@@ -43,22 +45,42 @@ func main() {
 	})
 
 	if err != nil {
-		fmt.Printf("Database : Not Connect [%s]", err.Error())
+		glg.Log("Database : Not Connect [%s]", err.Error())
 	} else {
-		fmt.Println("Database : Connected")
+		glg.Log("Database : Connected")
 	}
 
 	// init validator
 	validate := validator.New()
 
 	currentTime := time.Now()
-	fmt.Println("Date     : " + currentTime.String())
-	fmt.Println("======================================SERVICE======================================")
+	glg.Log("Date     : " + currentTime.String())
+	glg.Log("======================================SERVICE======================================")
 
-	config.Setup(config.ServiceConfig{
+	config.SetupService(config.ServiceConfig{
 		Url: os.Getenv("APP_URL"),
 		Port: os.Getenv("APP_PORT"),
 		Db: db,
 		Validate: validate,
 	})
+}
+
+func setupLogger() {
+	logActive := os.Getenv("APP_LOG")
+
+	if logActive == "true" {
+		// log := glg.FileWriter("../../log/application.log", 0666)
+		log := glg.FileWriter("log/application.log", 0666)
+		glg.Get().
+			SetMode(glg.BOTH).
+			AddLevelWriter(glg.LOG, log).
+			AddLevelWriter(glg.DEBG, log).
+			AddLevelWriter(glg.INFO, log)
+		
+		logEr := glg.FileWriter("log/application.err", 0666)
+		glg.Get().
+			SetMode(glg.BOTH).
+			AddLevelWriter(glg.ERR, logEr).
+			AddLevelWriter(glg.WARN, logEr)
+	}
 }
