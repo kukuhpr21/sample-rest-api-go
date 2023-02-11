@@ -9,14 +9,14 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-type SetupServiceConfig struct {
+type ServiceConfig struct {
 	Url   string
 	Port string
 	Db *sql.DB
 	Validate *validator.Validate
 }
 
-func Setup(c SetupServiceConfig) {
+func Setup(c ServiceConfig) {
 	gin.SetMode(gin.ReleaseMode)
 	gin.DefaultWriter = ioutil.Discard
 	server := gin.Default()
