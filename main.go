@@ -55,7 +55,7 @@ func main() {
 	fmt.Println("Date     : " + currentTime.String())
 	fmt.Println("======================================SERVICE======================================")
 
-	config.SetupService(config.SetupServiceConfig{
+	config.Setup(config.SetupServiceConfig{
 		Url: os.Getenv("APP_URL"),
 		Port: os.Getenv("APP_PORT"),
 		Db: db,

@@ -11,7 +11,7 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-func RegisterLayers(r *gin.RouterGroup, db *sql.DB, v *validator.Validate) {
+func NewLayer(r *gin.RouterGroup, db *sql.DB, v *validator.Validate) {
 	productRoute := productLayers(db, v)
 
 	productRoute.ProductRoute(r)
