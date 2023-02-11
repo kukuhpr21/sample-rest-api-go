@@ -21,6 +21,7 @@ func ResponseLogger(ctx *gin.Context) {
 	blw := &bodyLogWriter{body: bytes.NewBufferString(""), ResponseWriter: ctx.Writer}
     ctx.Writer = blw
 	ctx.Next()
+	glg.Log("")
 	glg.Log("Response")
 	glg.Log("Status     : ", blw.ResponseWriter.Status())
 	glg.Log("Body       : ", blw.body.String())
