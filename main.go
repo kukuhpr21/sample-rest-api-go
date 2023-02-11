@@ -2,12 +2,7 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"kukuhpr21/sample-rest-api-go/src/config"
-	"kukuhpr21/sample-rest-api-go/src/controllers"
-	"kukuhpr21/sample-rest-api-go/src/repositories"
-	"kukuhpr21/sample-rest-api-go/src/routes"
-	"kukuhpr21/sample-rest-api-go/src/services"
 	"log"
 	"os"
 	"time"
@@ -32,12 +27,10 @@ func init() {
 }
 
 func main() {
-
-	fmt.Println("")
 	fmt.Println("======================================SERVICE======================================")
-	fmt.Println("Name : " + os.Getenv("APP_NAME"))
-	fmt.Println("Version : " + os.Getenv("APP_VERSION"))
-	fmt.Println("Port : " + os.Getenv("APP_PORT"))
+	fmt.Println("Name     : " + os.Getenv("APP_NAME"))
+	fmt.Println("Version  : " + os.Getenv("APP_VERSION"))
+	fmt.Println("Port     : " + os.Getenv("APP_PORT"))
 
 	// init database
 	db, err := config.NewDB(config.DatabaseConfig{
@@ -58,26 +51,14 @@ func main() {
 	// init validator
 	validate := validator.New()
 
-	// init layers
-	productRepository := repositories.NewProductRepository(db)
-	productService := services.NewProductService(productRepository, validate)
-	productController := controllers.NewProductController(productService)
-	productRoute := routes.NewRouteProductController(productController)
-
 	currentTime := time.Now()
-	fmt.Println("Date Time : " + currentTime.String())
+	fmt.Println("Date     : " + currentTime.String())
 	fmt.Println("======================================SERVICE======================================")
 
-	gin.SetMode(gin.ReleaseMode)
-	gin.DefaultWriter = ioutil.Discard
-	server := gin.Default()
-	server.Use(gin.Recovery())
-
-	router := server.Group("/v1")
-	productRoute.ProductRoute(router)
-	err = server.Run(os.Getenv("APP_URL") + ":" + os.Getenv("APP_PORT"))
-
-	if err != nil {
-		fmt.Printf("Server : Not Connect [%s]", err.Error())
-	}
+	config.SetupService(config.SetupServiceConfig{
+		Url: os.Getenv("APP_URL"),
+		Port: os.Getenv("APP_PORT"),
+		Db: db,
+		Validate: validate,
+	})
 }
