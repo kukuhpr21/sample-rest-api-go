@@ -43,6 +43,7 @@ func main() {
 	db, err := config.NewDB(config.DatabaseConfig{
 		Driver:   os.Getenv("DB_DRIVER"),
 		Username: os.Getenv("DB_USERNAME"),
+		Password: os.Getenv("DB_PASSWORD"),
 		Host:     os.Getenv("DB_HOST"),
 		Port:     os.Getenv("DB_PORT"),
 		Name:     os.Getenv("DB_NAME"),
@@ -72,7 +73,7 @@ func main() {
 	server := gin.Default()
 	server.Use(gin.Recovery())
 
-	router := server.Group("/api")
+	router := server.Group("/v1")
 	productRoute.ProductRoute(router)
 	err = server.Run(os.Getenv("APP_URL") + ":" + os.Getenv("APP_PORT"))
 

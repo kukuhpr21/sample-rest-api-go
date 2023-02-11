@@ -8,6 +8,7 @@ import (
 type DatabaseConfig struct {
 	Driver   string
 	Username string
+	Password string
 	Host     string
 	Port     string
 	Name     string
@@ -16,7 +17,12 @@ type DatabaseConfig struct {
 func NewDB(dbConfig DatabaseConfig) (*sql.DB, error) {
 
 	// Db Config
-	mydb := dbConfig.Username + "@tcp(" + dbConfig.Host + ":" + dbConfig.Port + ")/" + dbConfig.Name
+	 mPassword := ""
+	if len(dbConfig.Password) > 0 {
+		mPassword = ":"+dbConfig.Password
+	}
+	
+	mydb := dbConfig.Username +mPassword + "@tcp(" + dbConfig.Host + ":" + dbConfig.Port + ")/" + dbConfig.Name
 	db, err := sql.Open(dbConfig.Driver, mydb)
 
 	if err == nil {
