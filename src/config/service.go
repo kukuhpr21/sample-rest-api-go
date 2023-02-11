@@ -16,14 +16,18 @@ type ServiceConfig struct {
 	Validate *validator.Validate
 }
 
-func Setup(c ServiceConfig) {
+func SetupService(c ServiceConfig) {
 	gin.SetMode(gin.ReleaseMode)
 	gin.DefaultWriter = ioutil.Discard
 	server := gin.Default()
 	server.Use(gin.Recovery())
 
 	router := server.Group("/v1")
-	NewLayer(router, c.Db, c.Validate)
+	SetupLayer(LayerConfig {
+		R: router,
+		Db: c.Db,
+		V: c.Validate,
+	})
 	err := server.Run(c.Url + ":" + c.Port)
 
 	if err != nil {

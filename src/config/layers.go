@@ -10,11 +10,16 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 )
+type LayerConfig struct {
+	R *gin.RouterGroup
+	Db *sql.DB
+	V *validator.Validate
+}
 
-func NewLayer(r *gin.RouterGroup, db *sql.DB, v *validator.Validate) {
-	productRoute := productLayers(db, v)
+func SetupLayer(c LayerConfig) {
+	productRoute := productLayers(c.Db, c.V)
 
-	productRoute.ProductRoute(r)
+	productRoute.ProductRoute(c.R)
 
 }
 
