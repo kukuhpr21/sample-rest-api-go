@@ -1,6 +1,8 @@
 package middleware
 
 import (
+	"bytes"
+	"encoding/json"
 	"io/ioutil"
 
 	"github.com/gin-gonic/gin"
@@ -16,8 +18,14 @@ func RequestLogger(ctx *gin.Context) {
 	glg.Log("User Agent : ", request.UserAgent())
 	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
-		glg.Log("Body       : error parsing")
+		glg.Log("Body       : error parsing ", err)
 	}
-	glg.Log("Body       : ", string(body))
+	
+	buffer := new(bytes.Buffer)
+
+	if err := json.Compact(buffer, body); err != nil {
+		glg.Log("Body       : error json compact ", err)
+	}
+	glg.Log("Body       : ", buffer)
 
 }
