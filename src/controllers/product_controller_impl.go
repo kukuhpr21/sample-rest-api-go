@@ -122,9 +122,9 @@ func (c *ProductControllerImpl) Delete(ctx *gin.Context) {
 		return
 	} else {
 		type data struct {
-			Id int	
+			Id int
 		}
-		mData := data {
+		mData := data{
 			Id: id,
 		}
 		helper.SendResponseClient(ctx, response.Client{
@@ -134,5 +134,25 @@ func (c *ProductControllerImpl) Delete(ctx *gin.Context) {
 		})
 		return
 	}
+}
 
+// FindAll implements ProductController
+func (c *ProductControllerImpl) FindAll(ctx *gin.Context) {
+	datas, err := c.ProductService.FindAll(ctx.Request.Context())
+
+	if err != nil {
+		helper.SendResponseClient(ctx, response.Client{
+			Code:   http.StatusInternalServerError,
+			Status: http.StatusText(http.StatusInternalServerError),
+			Data:   err.Error(),
+		})
+		return
+	} else {
+		helper.SendResponseClient(ctx, response.Client{
+			Code:   http.StatusOK,
+			Status: http.StatusText(http.StatusOK),
+			Data:   datas,
+		})
+		return
+	}
 }

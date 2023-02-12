@@ -77,4 +77,19 @@ func (s *ProductServiceImpl) Delete(ctx context.Context, id int) error {
 	return nil
 }
 
+// FindAll implements ProductService
+func (s *ProductServiceImpl) FindAll(ctx context.Context) (datas []response.ProductResponse, err error) {
+	products, err := s.ProductRepository.FindAll(ctx)
 
+	if err != nil {
+		return nil, err
+	}
+
+	for i := 0; i < len(products); i++ {
+		data := response.ProductResponse{}
+		data.Id = products[i].Id
+		data.Name = products[i].Name
+		datas = append(datas, data)
+	}
+	return datas, nil
+}
