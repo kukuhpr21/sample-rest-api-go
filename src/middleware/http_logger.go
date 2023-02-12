@@ -20,7 +20,7 @@ func (w bodyLogWriter) Write(b []byte) (int, error) {
     return w.ResponseWriter.Write(b)
 }
 
-func Logger() gin.HandlerFunc {
+func HTTPLogger() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// request logger
 		t := time.Now()
@@ -31,17 +31,23 @@ func Logger() gin.HandlerFunc {
 		glg.Log("Path       : ", request.URL.Path)
 		glg.Log("Method     : ", request.Method)
 		glg.Log("User Agent : ", request.UserAgent())
-		body, err := ioutil.ReadAll(request.Body)
 		
+		body, err := ioutil.ReadAll(request.Body)
+	
 		if err != nil {
-			glg.Log("Body       : error parsing ", err.Error())
+			glg.Log("Body       :  error parsing ", err.Error())
 		}
 
-		buffer := new(bytes.Buffer)
-		if err := json.Compact(buffer, body); err != nil {
-			glg.Log("Body       : error json compact ", err)
+		if len(body) > 0 {
+
+			buffer := new(bytes.Buffer)
+			if err := json.Compact(buffer, body); err != nil {
+				glg.Log("Body       :  error json compact ", err)
+			} else {
+				glg.Log("Body       : ", buffer)
+			}
 		} else {
-			glg.Log("Body       : ", buffer)
+			glg.Log("Body       :  empty")
 		}
 
 		c.Request.Body = ioutil.NopCloser(bytes.NewReader(body))

@@ -53,9 +53,8 @@ func (s *ProductServiceImpl) Update(ctx context.Context, request productrequest.
 		return response, err
 	}
 
-
 	result, err := s.ProductRepository.Update(ctx, entities.ProductEntity{
-		Id: request.Id,
+		Id:   request.Id,
 		Name: request.Name,
 	})
 
@@ -67,3 +66,15 @@ func (s *ProductServiceImpl) Update(ctx context.Context, request productrequest.
 	response.Name = result.Name
 	return response, nil
 }
+
+// Delete implements ProductService
+func (s *ProductServiceImpl) Delete(ctx context.Context, id int) error {
+	err := s.ProductRepository.Delete(ctx, id)
+
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+

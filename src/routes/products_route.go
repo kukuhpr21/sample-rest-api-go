@@ -18,7 +18,7 @@ func (pc *ProductRouteController) ProductRoute(rg *gin.RouterGroup) *gin.RouterG
 	router := rg.Group("products")
 	router.POST("/", pc.productController.Create)
 	router.PUT("/:id", pc.productController.Update)
-	// router.DELETE("/:postId", pc.productController.Delete)
+	router.DELETE("/:id", pc.productController.Delete)
 	// router.GET("/", pc.productController.FindAll)
 	// router.GET("/:postId", pc.productController.FindById)
 	return router

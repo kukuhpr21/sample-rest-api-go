@@ -88,8 +88,33 @@ func (r *ProductRepositoryImpl) Update(ctx context.Context, product entities.Pro
 }
 
 // Delete implements ProductRepository
-func (*ProductRepositoryImpl) Delete(ctx context.Context, tx *sql.Tx, id int) error {
-	panic("unimplemented")
+func (r *ProductRepositoryImpl) Delete(ctx context.Context, id int) error {
+	tx, errTx := r.conn.Begin()
+
+	if errTx != nil {
+		return errTx
+	}
+
+	defer func() {
+		if p := recover(); p != nil {
+			_ = tx.Rollback()
+		} else if errTx != nil {
+			_ = tx.Rollback()
+		} else {
+			_ = tx.Commit()
+		}
+	}()
+
+	SQL := "DELETE FROM " + tProduct + " WHERE id = ?"
+
+	// Exec
+	_, err := tx.ExecContext(ctx, SQL, id)
+
+	if err != nil {
+		return err
+	}
+	return nil
+
 }
 
 // FindAll implements ProductRepository

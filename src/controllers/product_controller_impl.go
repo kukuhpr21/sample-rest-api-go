@@ -42,12 +42,14 @@ func (c *ProductControllerImpl) Create(ctx *gin.Context) {
 			Status: http.StatusText(http.StatusInternalServerError),
 			Data:   err.Error(),
 		})
+		return
 	} else {
 		helper.SendResponseClient(ctx, response.Client{
 			Code:   http.StatusCreated,
 			Status: http.StatusText(http.StatusCreated),
 			Data:   data,
 		})
+		return
 	}
 }
 
@@ -73,6 +75,7 @@ func (c *ProductControllerImpl) Update(ctx *gin.Context) {
 			Status: http.StatusText(http.StatusBadRequest),
 			Data:   err.Error(),
 		})
+		return
 	}
 	payload.Id = id
 	data, err := c.ProductService.Update(ctx.Request.Context(), *payload)
@@ -83,11 +86,53 @@ func (c *ProductControllerImpl) Update(ctx *gin.Context) {
 			Status: http.StatusText(http.StatusInternalServerError),
 			Data:   err.Error(),
 		})
+		return
 	} else {
 		helper.SendResponseClient(ctx, response.Client{
 			Code:   http.StatusOK,
 			Status: http.StatusText(http.StatusOK),
 			Data:   data,
 		})
+		return
 	}
+}
+
+// Delete implements ProductController
+func (c *ProductControllerImpl) Delete(ctx *gin.Context) {
+	productId := ctx.Params.ByName("id")
+	id, err := strconv.Atoi(productId)
+
+	if err != nil {
+		helper.SendResponseClient(ctx, response.Client{
+			Code:   http.StatusBadRequest,
+			Status: http.StatusText(http.StatusBadRequest),
+			Data:   err.Error(),
+		})
+		return
+	}
+
+	err = c.ProductService.Delete(ctx.Request.Context(), id)
+
+	if err != nil {
+		helper.SendResponseClient(ctx, response.Client{
+			Code:   http.StatusInternalServerError,
+			Status: http.StatusText(http.StatusInternalServerError),
+			Data:   err.Error(),
+		})
+		return
+	} else {
+		type data struct {
+			Id int	
+		}
+		mData := data {
+			Id: id,
+		}
+		helper.SendResponseClient(ctx, response.Client{
+			Code:   http.StatusOK,
+			Status: http.StatusText(http.StatusOK),
+			Data:   mData,
+		})
+		return
+	}
+
 }
