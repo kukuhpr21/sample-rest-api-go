@@ -22,8 +22,7 @@ func SetupService(c ServiceConfig) {
 	gin.DefaultWriter = ioutil.Discard
 	server := gin.Default()
 	server.Use(gin.Recovery())
-	server.Use(middleware.RequestLogger)
-	server.Use(middleware.ResponseLogger)
+	server.Use(middleware.Logger())
 	router := server.Group("/v1")
 	SetupLayer(LayerConfig {
 		R: router,
