@@ -6,6 +6,7 @@ import (
 	"kukuhpr21/sample-rest-api-go/src/models/response"
 	"kukuhpr21/sample-rest-api-go/src/services"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -21,7 +22,7 @@ func NewProductController(productService services.ProductService) ProductControl
 }
 
 // Create implements ProductController
-func (p *ProductControllerImpl) Create(ctx *gin.Context) {
+func (c *ProductControllerImpl) Create(ctx *gin.Context) {
 	var payload *productrequest.Create
 
 	if err := ctx.ShouldBindJSON(&payload); err != nil {
@@ -33,7 +34,7 @@ func (p *ProductControllerImpl) Create(ctx *gin.Context) {
 		return
 	}
 
-	data, err := p.ProductService.Create(ctx.Request.Context(), *payload)
+	data, err := c.ProductService.Create(ctx.Request.Context(), *payload)
 
 	if err != nil {
 		helper.SendResponseClient(ctx, response.Client{
@@ -48,5 +49,45 @@ func (p *ProductControllerImpl) Create(ctx *gin.Context) {
 			Data:   data,
 		})
 	}
+}
 
+// Update implements ProductController
+func (c *ProductControllerImpl) Update(ctx *gin.Context) {
+	var payload *productrequest.Update
+
+	if err := ctx.ShouldBindJSON(&payload); err != nil {
+		helper.SendResponseClient(ctx, response.Client{
+			Code:   http.StatusBadRequest,
+			Status: http.StatusText(http.StatusBadRequest),
+			Data:   err.Error(),
+		})
+		return
+	}
+
+	productId := ctx.Params.ByName("id")
+	id, err := strconv.Atoi(productId)
+
+	if err != nil {
+		helper.SendResponseClient(ctx, response.Client{
+			Code:   http.StatusBadRequest,
+			Status: http.StatusText(http.StatusBadRequest),
+			Data:   err.Error(),
+		})
+	}
+	payload.Id = id
+	data, err := c.ProductService.Update(ctx.Request.Context(), *payload)
+
+	if err != nil {
+		helper.SendResponseClient(ctx, response.Client{
+			Code:   http.StatusInternalServerError,
+			Status: http.StatusText(http.StatusInternalServerError),
+			Data:   err.Error(),
+		})
+	} else {
+		helper.SendResponseClient(ctx, response.Client{
+			Code:   http.StatusOK,
+			Status: http.StatusText(http.StatusOK),
+			Data:   data,
+		})
+	}
 }

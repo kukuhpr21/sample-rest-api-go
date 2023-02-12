@@ -17,10 +17,9 @@ func NewProductRepository(conn *sql.DB) ProductRepository {
 }
 
 // Save implements ProductRepository
-func (pr *ProductRepositoryImpl) Save(ctx context.Context, name string) (entities.ProductEntity, error) {
-	product := entities.ProductEntity{}
+func (r *ProductRepositoryImpl) Save(ctx context.Context, name string) (product entities.ProductEntity, err error) {
 
-	tx, errTx := pr.conn.Begin()
+	tx, errTx := r.conn.Begin()
 
 	if errTx != nil {
 		return product, errTx
@@ -60,8 +59,32 @@ func (pr *ProductRepositoryImpl) Save(ctx context.Context, name string) (entitie
 }
 
 // Update implements ProductRepository
-func (*ProductRepositoryImpl) Update(ctx context.Context, tx *sql.Tx, id int, product entities.ProductEntity) (entities.ProductEntity, error) {
-	panic("unimplemented")
+func (r *ProductRepositoryImpl) Update(ctx context.Context, product entities.ProductEntity) (entities.ProductEntity, error) {
+	tx, errTx := r.conn.Begin()
+
+	if errTx != nil {
+		return product, errTx
+	}
+
+	defer func() {
+		if p := recover(); p != nil {
+			_ = tx.Rollback()
+		} else if errTx != nil {
+			_ = tx.Rollback()
+		} else {
+			_ = tx.Commit()
+		}
+	}()
+
+	SQL := "UPDATE " + tProduct + " SET name = ? WHERE id = ?"
+
+	// Exec
+	_, err := tx.ExecContext(ctx, SQL, product.Name, product.Id)
+
+	if err != nil {
+		return product, err
+	}
+	return product, nil
 }
 
 // Delete implements ProductRepository

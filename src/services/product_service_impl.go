@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"kukuhpr21/sample-rest-api-go/src/models/entities"
 	"kukuhpr21/sample-rest-api-go/src/models/request/productrequest"
 	"kukuhpr21/sample-rest-api-go/src/models/response"
 	"kukuhpr21/sample-rest-api-go/src/repositories"
@@ -14,6 +15,7 @@ type ProductServiceImpl struct {
 	Validate          *validator.Validate
 }
 
+
 func NewProductService(productRepository repositories.ProductRepository, validate *validator.Validate) ProductService {
 	return &ProductServiceImpl{
 		ProductRepository: productRepository,
@@ -22,22 +24,46 @@ func NewProductService(productRepository repositories.ProductRepository, validat
 }
 
 // Create implements ProductService
-func (service *ProductServiceImpl) Create(ctx context.Context, request productrequest.Create) (response response.ProductResponse, err error) {
+func (s *ProductServiceImpl) Create(ctx context.Context, request productrequest.Create) (response response.ProductResponse, err error) {
 
 	// validate request
-	err = service.Validate.Struct(request)
+	err = s.Validate.Struct(request)
 
 	if err != nil {
 		return response, err
 	}
 	name := request.Name
-	productEntity, err := service.ProductRepository.Save(ctx, name)
+	result, err := s.ProductRepository.Save(ctx, name)
 
 	if err != nil {
 		return response, err
 	}
 
-	response.Id = productEntity.Id
-	response.Name = productEntity.Name
+	response.Id = result.Id
+	response.Name = result.Name
+	return response, nil
+}
+
+// Update implements ProductService
+func (s *ProductServiceImpl) Update(ctx context.Context, request productrequest.Update) (response response.ProductResponse, err error) {
+	// validate request
+	err = s.Validate.Struct(request)
+
+	if err != nil {
+		return response, err
+	}
+
+
+	result, err := s.ProductRepository.Update(ctx, entities.ProductEntity{
+		Id: request.Id,
+		Name: request.Name,
+	})
+
+	if err != nil {
+		return response, err
+	}
+
+	response.Id = result.Id
+	response.Name = result.Name
 	return response, nil
 }
