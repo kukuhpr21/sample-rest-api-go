@@ -122,7 +122,7 @@ func (c *ProductControllerImpl) Delete(ctx *gin.Context) {
 		return
 	} else {
 		type data struct {
-			Id int
+			Id int `json:"id"`
 		}
 		mData := data{
 			Id: id,
@@ -186,14 +186,14 @@ func (c *ProductControllerImpl) FindById(ctx *gin.Context) {
 		helper.SendResponseClient(ctx, response.Client{
 			Code:   http.StatusNotFound,
 			Status: http.StatusText(http.StatusNotFound),
-			Data: "",
+			Data:   "",
 		})
 		return
 	} else {
 		helper.SendResponseClient(ctx, response.Client{
 			Code:   http.StatusOK,
 			Status: http.StatusText(http.StatusOK),
-			Data: data,
+			Data:   data,
 		})
 		return
 	}
