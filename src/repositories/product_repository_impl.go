@@ -159,6 +159,35 @@ func (r *ProductRepositoryImpl) FindAll(ctx context.Context) (products []entitie
 }
 
 // FindById implements ProductRepository
-func (*ProductRepositoryImpl) FindById(ctx context.Context, tx *sql.Tx, categoryId int) (entities.ProductEntity, error) {
-	panic("unimplemented")
+func (r *ProductRepositoryImpl) FindById(ctx context.Context, id int) (product entities.ProductEntity, err error) {
+	tx, err := r.conn.Begin()
+
+	if err != nil {
+		return product, err
+	}
+
+	defer func() {
+		if p := recover(); p != nil {
+			_ = tx.Rollback()
+		} else if err != nil {
+			_ = tx.Rollback()
+		} else {
+			_ = tx.Commit()
+		}
+	}()
+
+	SQL := "SELECT id, name FROM products WHERE id = ?"
+
+	// Query
+	rows, err := tx.QueryContext(ctx, SQL, id)
+
+	if err != nil {
+		return product, err
+	}
+
+	if rows.Next() {
+		rows.Scan(&product.Id, &product.Name)
+		return product, nil
+	}
+	return product, nil
 }

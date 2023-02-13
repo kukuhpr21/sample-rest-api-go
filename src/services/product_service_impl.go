@@ -93,3 +93,16 @@ func (s *ProductServiceImpl) FindAll(ctx context.Context) (datas []response.Prod
 	}
 	return datas, nil
 }
+
+// FindById implements ProductService
+func (s *ProductServiceImpl) FindById(ctx context.Context, id int) (data response.ProductResponse, err error) {
+	product, err := s.ProductRepository.FindById(ctx, id)
+
+	if err != nil {
+		return data, err
+	}
+
+	data.Id = product.Id
+	data.Name = product.Name
+	return data, nil
+}

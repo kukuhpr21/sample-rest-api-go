@@ -156,3 +156,46 @@ func (c *ProductControllerImpl) FindAll(ctx *gin.Context) {
 		return
 	}
 }
+
+// FindById implements ProductController
+func (c *ProductControllerImpl) FindById(ctx *gin.Context) {
+	productId := ctx.Params.ByName("id")
+	id, err := strconv.Atoi(productId)
+
+	if err != nil {
+		helper.SendResponseClient(ctx, response.Client{
+			Code:   http.StatusBadRequest,
+			Status: http.StatusText(http.StatusBadRequest),
+			Data:   err.Error(),
+		})
+		return
+	}
+
+	data, err := c.ProductService.FindById(ctx.Request.Context(), id)
+
+	if err != nil {
+		helper.SendResponseClient(ctx, response.Client{
+			Code:   http.StatusInternalServerError,
+			Status: http.StatusText(http.StatusInternalServerError),
+			Data:   err.Error(),
+		})
+		return
+	}
+
+	if data.Name == "" {
+		helper.SendResponseClient(ctx, response.Client{
+			Code:   http.StatusNotFound,
+			Status: http.StatusText(http.StatusNotFound),
+			Data: "",
+		})
+		return
+	} else {
+		helper.SendResponseClient(ctx, response.Client{
+			Code:   http.StatusOK,
+			Status: http.StatusText(http.StatusOK),
+			Data: data,
+		})
+		return
+	}
+
+}

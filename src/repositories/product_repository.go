@@ -10,5 +10,5 @@ type ProductRepository interface {
 	Update(ctx context.Context, product entities.ProductEntity) (entities.ProductEntity, error)
 	Delete(ctx context.Context, id int) error
 	FindAll(ctx context.Context) ([]entities.ProductEntity, error)
-	// FindById(ctx context.Context, tx *sql.Tx, categoryId int) (entities.ProductEntity, error)
+	FindById(ctx context.Context, id int) (entities.ProductEntity, error)
 }

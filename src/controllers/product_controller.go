@@ -7,5 +7,5 @@ type ProductController interface {
 	Update(ctx *gin.Context)
 	Delete(ctx *gin.Context)
 	FindAll(ctx *gin.Context)
-	// FindById(ctx *gin.Context)
+	FindById(ctx *gin.Context)
 }
