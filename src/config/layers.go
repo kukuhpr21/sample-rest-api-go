@@ -10,17 +10,28 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 )
+
 type LayerConfig struct {
-	R *gin.RouterGroup
+	R  *gin.RouterGroup
 	Db *sql.DB
-	V *validator.Validate
+	V  *validator.Validate
 }
 
 func SetupLayer(c LayerConfig) {
+	authRoute := authLayers(c.Db, c.V)
 	productRoute := productLayers(c.Db, c.V)
 
+	authRoute.AuthRoute(c.R)
 	productRoute.ProductRoute(c.R)
 
+}
+
+func authLayers(db *sql.DB, v *validator.Validate) routes.AuthRouteController {
+	userRepository := repositories.NewUserRepository(db)
+	authService := services.NewAuthService(userRepository, v)
+	authController := controllers.NewAuthController(authService)
+	authRoute := routes.NewRouteAuthController(authController)
+	return authRoute
 }
 
 func productLayers(db *sql.DB, v *validator.Validate) routes.ProductRouteController {

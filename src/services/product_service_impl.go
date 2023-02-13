@@ -15,7 +15,6 @@ type ProductServiceImpl struct {
 	Validate          *validator.Validate
 }
 
-
 func NewProductService(productRepository repositories.ProductRepository, validate *validator.Validate) ProductService {
 	return &ProductServiceImpl{
 		ProductRepository: productRepository,

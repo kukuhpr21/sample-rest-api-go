@@ -28,7 +28,7 @@ func init() {
 
 func main() {
 	setupLogger()
-	
+
 	glg.Log("======================================SERVICE======================================")
 	glg.Log("Name     : " + os.Getenv("APP_NAME"))
 	glg.Log("Version  : " + os.Getenv("APP_VERSION"))
@@ -58,9 +58,9 @@ func main() {
 	glg.Log("======================================SERVICE======================================")
 
 	config.SetupService(config.ServiceConfig{
-		Url: os.Getenv("APP_URL"),
-		Port: os.Getenv("APP_PORT"),
-		Db: db,
+		Url:      os.Getenv("APP_URL"),
+		Port:     os.Getenv("APP_PORT"),
+		Db:       db,
 		Validate: validate,
 	})
 }
@@ -76,7 +76,7 @@ func setupLogger() {
 			AddLevelWriter(glg.LOG, log).
 			AddLevelWriter(glg.DEBG, log).
 			AddLevelWriter(glg.INFO, log)
-		
+
 		logEr := glg.FileWriter("log/application.err", 0666)
 		glg.Get().
 			SetMode(glg.BOTH).

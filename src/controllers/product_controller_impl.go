@@ -121,16 +121,10 @@ func (c *ProductControllerImpl) Delete(ctx *gin.Context) {
 		})
 		return
 	} else {
-		type data struct {
-			Id int `json:"id"`
-		}
-		mData := data{
-			Id: id,
-		}
 		helper.SendResponseClient(ctx, response.Client{
 			Code:   http.StatusOK,
 			Status: http.StatusText(http.StatusOK),
-			Data:   mData,
+			Data:   map[string]int{"id": id},
 		})
 		return
 	}
