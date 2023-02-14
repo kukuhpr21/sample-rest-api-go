@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"kukuhpr21/sample-rest-api-go/src/helper"
 	"kukuhpr21/sample-rest-api-go/src/models/request/authrequest"
 	"kukuhpr21/sample-rest-api-go/src/repositories"
 	"os"
@@ -76,7 +77,7 @@ func (s *AuthServiceImpl) Login(ctx context.Context, request authrequest.Login) 
 // RefreshToken implements AuthService
 func (s *AuthServiceImpl) RefreshToken(ctx context.Context, refreshToken string) (interface{}, error) {
 
-	request, err := s.parsingToken(refreshToken)
+	request, err := parsingToken(refreshToken)
 
 	if err != nil {
 		fmt.Println(err.Error())
@@ -160,16 +161,8 @@ func createToken(id string, name string, email string, isAccess bool) (string, e
 	return signedToken, nil
 }
 
-func (*AuthServiceImpl) parsingToken(tokenRequest string) (parseToken authrequest.Token, err error) {
-	token, err := jwt.Parse(tokenRequest, func(token *jwt.Token) (interface{}, error) {
-		if method, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.New("Signing method invalid")
-		} else if method != jwt.SigningMethodHS256 {
-			return nil, errors.New("Signing method invalid")
-		}
-
-		return []byte(os.Getenv("JWT_KEY")), nil
-	})
+func parsingToken(tokenRequest string) (parseToken authrequest.Token, err error) {
+	token, err := helper.IsValidToken(tokenRequest)
 
 	if err != nil {
 		return parseToken, err

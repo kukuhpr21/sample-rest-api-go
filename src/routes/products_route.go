@@ -2,6 +2,7 @@ package routes
 
 import (
 	"kukuhpr21/sample-rest-api-go/src/controllers"
+	"kukuhpr21/sample-rest-api-go/src/middleware"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,6 +17,7 @@ func NewRouteProductController(productController controllers.ProductController) 
 
 func (pc *ProductRouteController) ProductRoute(rg *gin.RouterGroup) *gin.RouterGroup {
 	router := rg.Group("products")
+	router.Use(middleware.VerifyToken())
 	router.POST("/", pc.productController.Create)
 	router.PUT("/:id", pc.productController.Update)
 	router.DELETE("/:id", pc.productController.Delete)
