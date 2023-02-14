@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"kukuhpr21/sample-rest-api-go/src/models/entities"
 )
 
@@ -139,7 +140,7 @@ func (r *ProductRepositoryImpl) FindAll(ctx context.Context) (products []entitie
 
 	// Query
 	rows, err := tx.QueryContext(ctx, SQL)
-	
+
 	if err != nil {
 		return nil, err
 	}
@@ -149,7 +150,7 @@ func (r *ProductRepositoryImpl) FindAll(ctx context.Context) (products []entitie
 	for rows.Next() {
 		product := entities.ProductEntity{} // buat empty object categories
 		rows.Scan(&product.Id, &product.Name)
-		
+
 		if err != nil {
 			return nil, err
 		}
@@ -179,15 +180,16 @@ func (r *ProductRepositoryImpl) FindById(ctx context.Context, id int) (product e
 	SQL := "SELECT id, name FROM products WHERE id = ?"
 
 	// Query
-	rows, err := tx.QueryContext(ctx, SQL, id)
+	row := tx.QueryRowContext(ctx, SQL, id)
+
+	err = row.Scan(&product.Id, &product.Name)
 
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return product, errors.New("Product Not Found")
+		}
 		return product, err
 	}
 
-	if rows.Next() {
-		rows.Scan(&product.Id, &product.Name)
-		return product, nil
-	}
 	return product, nil
 }
