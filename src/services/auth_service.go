@@ -7,4 +7,5 @@ import (
 
 type AuthService interface {
 	Login(ctx context.Context, request authrequest.Login) (interface{}, error)
+	RefreshToken(ctx context.Context, refreshToken string) (interface{}, error)
 }

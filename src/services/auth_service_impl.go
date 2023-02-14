@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"errors"
+	"fmt"
 	"kukuhpr21/sample-rest-api-go/src/models/request/authrequest"
 	"kukuhpr21/sample-rest-api-go/src/repositories"
 	"os"
@@ -19,6 +20,13 @@ type AuthServiceImpl struct {
 	Validate       *validator.Validate
 }
 
+type MyClaims struct {
+	jwt.StandardClaims
+	Id    string `json:"id"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
+}
+
 func NewAuthService(userRepository repositories.UserRepository, validate *validator.Validate) AuthService {
 	return &AuthServiceImpl{
 		UserRepository: userRepository,
@@ -33,6 +41,7 @@ func (s *AuthServiceImpl) Login(ctx context.Context, request authrequest.Login) 
 	if err != nil {
 		return "", err
 	}
+
 	user, err := s.UserRepository.FindByEmail(ctx, request.Email)
 
 	if err != nil {
@@ -48,6 +57,7 @@ func (s *AuthServiceImpl) Login(ctx context.Context, request authrequest.Login) 
 	accessToken, err := createToken(user.Id, user.Name, user.Email, true)
 
 	if err != nil {
+		fmt.Println(err.Error())
 		return "", err
 	}
 
@@ -63,8 +73,51 @@ func (s *AuthServiceImpl) Login(ctx context.Context, request authrequest.Login) 
 	}, nil
 }
 
-func createToken(id, name, email string, isAccess bool) (string, error) {
+// RefreshToken implements AuthService
+func (s *AuthServiceImpl) RefreshToken(ctx context.Context, refreshToken string) (interface{}, error) {
 
+	request, err := s.parsingToken(refreshToken)
+
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	err = s.Validate.Struct(request)
+
+	if err != nil {
+		return "", err
+	}
+
+	user, err := s.UserRepository.FindByEmail(ctx, request.Email)
+
+	if err != nil {
+		return "", err
+	}
+
+	if user.Id != "" {
+		accessToken, err := createToken(user.Id, user.Name, user.Email, true)
+
+		if err != nil {
+			return "", err
+		}
+
+		refreshToken, err := createToken(user.Id, user.Name, user.Email, false)
+
+		if err != nil {
+			return "", err
+		}
+
+		return map[string]string{
+			"access_token":  accessToken,
+			"refresh_token": refreshToken,
+		}, nil
+	} else {
+		return "", errors.New("Invalid token")
+	}
+}
+
+// CreateToken implements AuthService
+func createToken(id string, name string, email string, isAccess bool) (string, error) {
 	type MyClaims struct {
 		jwt.StandardClaims
 		Id    string `json:"id"`
@@ -100,8 +153,37 @@ func createToken(id, name, email string, isAccess bool) (string, error) {
 	)
 
 	signedToken, err := token.SignedString([]byte(os.Getenv("JWT_KEY")))
+
 	if err != nil {
 		return "", err
 	}
 	return signedToken, nil
+}
+
+func (*AuthServiceImpl) parsingToken(tokenRequest string) (parseToken authrequest.Token, err error) {
+	token, err := jwt.Parse(tokenRequest, func(token *jwt.Token) (interface{}, error) {
+		if method, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("Signing method invalid")
+		} else if method != jwt.SigningMethodHS256 {
+			return nil, errors.New("Signing method invalid")
+		}
+
+		return []byte(os.Getenv("JWT_KEY")), nil
+	})
+
+	if err != nil {
+		return parseToken, err
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+
+	if !ok || !token.Valid {
+		return parseToken, errors.New("Invalid token")
+	}
+
+	parseToken.Id = claims["id"].(string)
+	parseToken.Email = claims["email"].(string)
+	parseToken.Name = claims["name"].(string)
+	return parseToken, nil
+
 }

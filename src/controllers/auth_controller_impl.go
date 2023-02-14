@@ -51,3 +51,25 @@ func (c *AuthControllerImpl) Login(ctx *gin.Context) {
 	})
 	return
 }
+
+// RefreshToken implements AuthController
+func (c *AuthControllerImpl) RefreshToken(ctx *gin.Context) {
+	refreshToken := ctx.Request.Header.Get("refresh-token")
+	token, err := c.AuthService.RefreshToken(ctx, refreshToken)
+
+	if err != nil {
+		helper.SendResponseClient(ctx, response.Client{
+			Code:   http.StatusBadRequest,
+			Status: http.StatusText(http.StatusBadRequest),
+			Data:   err.Error(),
+		})
+		return
+	}
+
+	helper.SendResponseClient(ctx, response.Client{
+		Code:   http.StatusOK,
+		Status: http.StatusText(http.StatusOK),
+		Data:   token,
+	})
+	return
+}

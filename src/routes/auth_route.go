@@ -17,5 +17,6 @@ func NewRouteAuthController(authController controllers.AuthController) AuthRoute
 func (ac *AuthRouteController) AuthRoute(rg *gin.RouterGroup) *gin.RouterGroup {
 	router := rg.Group("auth")
 	router.POST("/login", ac.authController.Login)
+	router.GET("/refresh-token", ac.authController.RefreshToken)
 	return router
 }
