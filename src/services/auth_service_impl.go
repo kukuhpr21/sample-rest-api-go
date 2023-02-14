@@ -5,10 +5,12 @@ import (
 	"errors"
 	"kukuhpr21/sample-rest-api-go/src/models/request/authrequest"
 	"kukuhpr21/sample-rest-api-go/src/repositories"
+	"os"
+	"strconv"
+	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-playground/validator/v10"
-	"github.com/kpango/glg"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -25,7 +27,7 @@ func NewAuthService(userRepository repositories.UserRepository, validate *valida
 }
 
 // Login implements AuthService
-func (s *AuthServiceImpl) Login(ctx context.Context, request authrequest.Login) (string, error) {
+func (s *AuthServiceImpl) Login(ctx context.Context, request authrequest.Login) (interface{}, error) {
 	err := s.Validate.Struct(request)
 
 	if err != nil {
@@ -40,29 +42,66 @@ func (s *AuthServiceImpl) Login(ctx context.Context, request authrequest.Login) 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.Password))
 
 	if err != nil {
-		glg.Error(err.Error())
 		return "", errors.New("Invalid email or password")
 	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"id":    user.Id,
-		"email": user.Email,
-	})
-	return token.Raw, nil
+
+	accessToken, err := createToken(user.Id, user.Name, user.Email, true)
+
+	if err != nil {
+		return "", err
+	}
+
+	refreshToken, err := createToken(user.Id, user.Name, user.Email, false)
+
+	if err != nil {
+		return "", err
+	}
+
+	return map[string]string{
+		"access_token":  accessToken,
+		"refresh_token": refreshToken,
+	}, nil
 }
 
-// // FindByEmail implements UserService
-// func (s *UserServiceImpl) FindByEmail(ctx context.Context, email string) (data response.UserResponse, err error) {
-// 	user, err := s.UserRepository.FindByEmail(ctx, email)
+func createToken(id, name, email string, isAccess bool) (string, error) {
 
-// 	if err != nil {
-// 		return data, err
-// 	}
+	type MyClaims struct {
+		jwt.StandardClaims
+		Id    string `json:"id"`
+		Name  string `json:"name"`
+		Email string `json:"email"`
+	}
 
-// 	data.Id = user.Id
-// 	data.IdDetailUser = user.IdDetailUser
-// 	data.Name = user.Name
-// 	data.Email = user.Email
-// 	data.CreatedAt = user.CreatedAt
-// 	data.UpdatedAt = user.UpdatedAt
-// 	return data, nil
-// }
+	timeExpired := os.Getenv("JWT_EXPIRESIN_ACCESS")
+
+	if !isAccess {
+		timeExpired = os.Getenv("JWT_EXPIRESIN_REFRESH")
+	}
+
+	expiredIn, err := strconv.Atoi(timeExpired)
+
+	if err != nil {
+		return "", err
+	}
+
+	claims := MyClaims{
+		StandardClaims: jwt.StandardClaims{
+			Issuer:    os.Getenv("APP_NAME"),
+			ExpiresAt: time.Now().Add(time.Duration(expiredIn) * time.Hour).Unix(),
+		},
+		Id:    id,
+		Name:  name,
+		Email: email,
+	}
+
+	token := jwt.NewWithClaims(
+		jwt.SigningMethodHS256,
+		claims,
+	)
+
+	signedToken, err := token.SignedString([]byte(os.Getenv("JWT_KEY")))
+	if err != nil {
+		return "", err
+	}
+	return signedToken, nil
+}

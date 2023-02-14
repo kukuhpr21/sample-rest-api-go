@@ -47,9 +47,7 @@ func (c *AuthControllerImpl) Login(ctx *gin.Context) {
 	helper.SendResponseClient(ctx, response.Client{
 		Code:   http.StatusOK,
 		Status: http.StatusText(http.StatusOK),
-		Data: map[string]string{
-			"access_token": token,
-		},
+		Data:   token,
 	})
 	return
 }

@@ -35,7 +35,7 @@ func (r *UserRepositoryImpl) FindByEmail(ctx context.Context, email string) (use
 		}
 	}()
 
-	SQL := "SELECT id, id_detail_user, name, email, password, created_at, updated_at FROM products WHERE email = ?"
+	SQL := "SELECT id, id_detail_user, name, email, password, created_at, updated_at FROM " + tUser + " WHERE email = ?"
 
 	// Query
 	row := tx.QueryRowContext(ctx, SQL, email)
@@ -45,7 +45,7 @@ func (r *UserRepositoryImpl) FindByEmail(ctx context.Context, email string) (use
 		if err == sql.ErrNoRows {
 			return user, errors.New("User Not Found")
 		}
-		return user, nil
+		return user, err
 	}
 	return user, nil
 }
