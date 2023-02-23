@@ -10,7 +10,7 @@ type AuthRouteController struct {
 	authController controllers.AuthController
 }
 
-func NewRouteAuthController(authController controllers.AuthController) AuthRouteController {
+func NewAuthRouteController(authController controllers.AuthController) AuthRouteController {
 	return AuthRouteController{authController}
 }
 

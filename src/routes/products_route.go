@@ -11,7 +11,7 @@ type ProductRouteController struct {
 	productController controllers.ProductController
 }
 
-func NewRouteProductController(productController controllers.ProductController) ProductRouteController {
+func NewProductRouteController(productController controllers.ProductController) ProductRouteController {
 	return ProductRouteController{productController}
 }
 

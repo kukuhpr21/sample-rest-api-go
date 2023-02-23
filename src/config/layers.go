@@ -27,17 +27,17 @@ func SetupLayer(c LayerConfig) {
 }
 
 func authLayers(db *sql.DB, v *validator.Validate) routes.AuthRouteController {
-	userRepository := repositories.NewUserRepository(db)
-	authService := services.NewAuthService(userRepository, v)
-	authController := controllers.NewAuthController(authService)
-	authRoute := routes.NewRouteAuthController(authController)
-	return authRoute
+	repository := repositories.NewUserRepository(db)
+	service := services.NewAuthService(repository, v)
+	controller := controllers.NewAuthController(service)
+	route := routes.NewAuthRouteController(controller)
+	return route
 }
 
 func productLayers(db *sql.DB, v *validator.Validate) routes.ProductRouteController {
-	productRepository := repositories.NewProductRepository(db)
-	productService := services.NewProductService(productRepository, v)
-	productController := controllers.NewProductController(productService)
-	productRoute := routes.NewRouteProductController(productController)
-	return productRoute
+	repository := repositories.NewProductRepository(db)
+	service := services.NewProductService(repository, v)
+	controller := controllers.NewProductController(service)
+	route := routes.NewProductRouteController(controller)
+	return route
 }
