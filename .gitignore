@@ -1,3 +1,4 @@
 .env
 log
 go.mod
+.DS_Store
